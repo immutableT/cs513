@@ -9,7 +9,7 @@ def clean_file(
         drop_col_if_null: list[str],
         drop_not_required_col: list[str],
         convert_to_type: dict[str, str],
-        coerce_to_datetime: list[str]):
+        coerce_to_datetime: list[str]) -> pd.DataFrame:
     """
     Performs basic cleaning task: (1) drops raws with null values, when such raws are required
     for our use-case, (2) drops columns that are not required for our use-case and (3) converts
@@ -19,6 +19,7 @@ def clean_file(
     param drop_col_if_null: List of columns required for the use-case.
     param drop_not_required_col: List of columns not required for the use-case.
     param convert_to_type: List of columns where the data type needs to be coerced.
+    return: DataFrame with clean data.
     """
     path_to_zip = os.path.join('data', f'{file_name}.zip')
     with zipfile.ZipFile(path_to_zip, 'r') as zipf:
@@ -43,10 +44,11 @@ def clean_file(
         pass
 
     df.to_csv(save_path, index=False)
+    return df
 
 
 def clean():
-    clean_file(
+    menu_item_df = clean_file(
         file_name='MenuItem',
         drop_col_if_null=['price', 'menu_page_id', 'dish_id'],
         drop_not_required_col=['updated_at', 'xpos', 'ypos', 'high_price', 'created_at'],
@@ -54,7 +56,7 @@ def clean():
         coerce_to_datetime=[],
     )
 
-    clean_file(
+    menu_df = clean_file(
         file_name='Menu',
         drop_col_if_null=['date'],
         drop_not_required_col=[
@@ -79,6 +81,20 @@ def clean():
         ],
         convert_to_type={},
         coerce_to_datetime=['date']
+    )
+
+    menu_page_df = clean_file(
+        file_name='MenuPage',
+        drop_col_if_null=['menu_id'],
+        drop_not_required_col=[
+            'page_number',
+            'image_id',
+            'full_height',
+            'full_width',
+            'uuid',
+        ],
+        convert_to_type={'id': 'int64', 'menu_id': 'int64'},
+        coerce_to_datetime=[]
     )
 
 
