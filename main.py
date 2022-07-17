@@ -8,8 +8,8 @@ def clean_file(
         file_name: str,
         drop_col_if_null: list[str],
         drop_not_required_col: list[str],
-        convert_to_type: dict[str, str],
-        coerce_to_datetime: list[str]) -> pd.DataFrame:
+        convert_to_type: dict[str, str] = {},
+        coerce_to_datetime: list[str] = []) -> pd.DataFrame:
     """
     Performs basic cleaning task: (1) drops raws with null values, when such raws are required
     for our use-case, (2) drops columns that are not required for our use-case and (3) converts
@@ -49,11 +49,25 @@ def clean_file(
 
 def clean():
     menu_item_df = clean_file(
+        file_name='Dish',
+        drop_col_if_null=['id'],
+        drop_not_required_col=[
+            'description',
+            'menus_appeared',
+            'times_appeared',
+            'first_appeared',
+            'last_appeared',
+            'lowest_price',
+            'highest_price',
+        ],
+        convert_to_type={'id': 'int64'},
+    )
+
+    menu_item_df = clean_file(
         file_name='MenuItem',
         drop_col_if_null=['price', 'menu_page_id', 'dish_id'],
         drop_not_required_col=['updated_at', 'xpos', 'ypos', 'high_price', 'created_at'],
         convert_to_type={'dish_id': 'int64'},
-        coerce_to_datetime=[],
     )
 
     menu_df = clean_file(
@@ -79,7 +93,6 @@ def clean():
             'page_count',
             'dish_count',
         ],
-        convert_to_type={},
         coerce_to_datetime=['date']
     )
 
@@ -94,7 +107,6 @@ def clean():
             'uuid',
         ],
         convert_to_type={'id': 'int64', 'menu_id': 'int64'},
-        coerce_to_datetime=[]
     )
 
 
