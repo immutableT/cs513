@@ -55,6 +55,24 @@ def clean_file(
     return df
 
 
+def merge_dishes_to_menu_items(dish_df, menu_item_df):
+    join_df = pd.merge(
+        left=dish_df,
+        right=menu_item_df,
+        left_on='id',
+        right_on='dish_id',
+        how='inner',
+        suffixes=('_dish', '_menu_item'))
+    join_df.drop(['id_dish'], axis=1, inplace=True)
+    join_df['dish_id'] = join_df['dish_id'].astype(
+        dtype='int64',
+        errors='raise')
+    join_df.rename(
+        columns={'id_menu_item': 'menu_item_id'},
+        inplace=True)
+    return join_df
+
+
 def clean():
     dish_df = clean_file(
         file_name='Dish',
@@ -117,21 +135,7 @@ def clean():
         coerce_to_int64=['id', 'menu_id'],
     )
 
-    join_dish_menu_item_df = pd.merge(
-        left=dish_df,
-        right=menu_item_df,
-        left_on='id',
-        right_on='dish_id',
-        how='inner',
-        suffixes=('_dish', '_menu_item'))
-    join_dish_menu_item_df.drop(['id_dish'], axis=1, inplace=True)
-    join_dish_menu_item_df['dish_id'] = join_dish_menu_item_df['dish_id'].astype(
-        dtype='int64',
-        errors='raise')
-    join_dish_menu_item_df.rename(
-        columns={'id_menu_item': 'menu_item_id'},
-        inplace=True)
-
+    join_dish_menu_item_df = merge_dishes_to_menu_items(dish_df, menu_item_df)
     print(join_dish_menu_item_df.info())
     print(join_dish_menu_item_df.head(100))
 
