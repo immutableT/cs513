@@ -121,9 +121,19 @@ def clean():
         left=dish_df,
         right=menu_item_df,
         left_on='id',
-        right_on='dish_id')
+        right_on='dish_id',
+        how='inner',
+        suffixes=('_dish', '_menu_item'))
+    join_dish_menu_item_df.drop(['id_dish'], axis=1, inplace=True)
+    join_dish_menu_item_df['dish_id'] = join_dish_menu_item_df['dish_id'].astype(
+        dtype='int64',
+        errors='raise')
+    join_dish_menu_item_df.rename(
+        columns={'id_menu_item': 'menu_item_id'},
+        inplace=True)
 
     print(join_dish_menu_item_df.info())
+    print(join_dish_menu_item_df.head(100))
 
 
 if __name__ == '__main__':
