@@ -2,14 +2,15 @@ import os.path
 import pandas as pd
 import cpi
 import zipfile
+from typing import Optional
 
 
 def clean_file(
         file_name: str,
         drop_col_if_null: list[str],
         drop_not_required_col: list[str],
-        convert_to_type: dict[str, str] = {},
-        coerce_to_datetime: list[str] = []) -> pd.DataFrame:
+        coerce_to_int64: Optional[list[str]] = None,
+        coerce_to_datetime: Optional[list[str]] = None) -> pd.DataFrame:
     """
     Performs basic cleaning task: (1) drops raws with null values, when such raws are required
     for our use-case, (2) drops columns that are not required for our use-case and (3) converts
@@ -21,21 +22,28 @@ def clean_file(
     param convert_to_type: List of columns where the data type needs to be coerced.
     return: DataFrame with clean data.
     """
+    if not coerce_to_int64:
+        coerce_to_int64 = []
+    if not coerce_to_datetime:
+        coerce_to_datetime = []
+
     path_to_zip = os.path.join('data', f'{file_name}.zip')
     with zipfile.ZipFile(path_to_zip, 'r') as zipf:
         zipf.extractall(os.path.join('data'))
 
     path = os.path.join('data', f'{file_name}.csv')
     df = pd.read_csv(path)
-    df.dropna(subset=drop_col_if_null, inplace=True)
-    df.drop(drop_not_required_col, axis=1, inplace=True)
 
-    df = df.astype(convert_to_type, errors='raise')
+    for col in coerce_to_int64:
+        try:
+            df[col] = df[col].astype(dtype='int64', errors='raise')
+        except pd.errors.IntCastingNaNError:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
     for col in coerce_to_datetime:
         df[col] = pd.to_datetime(df[col], errors='coerce')
 
-    # At this point, we should not have any null values.
-    df.dropna(inplace=True)
+    df.drop(drop_not_required_col, axis=1, inplace=True)
+    df.dropna(subset=drop_col_if_null, inplace=True)
 
     save_path = os.path.join('data', f'{file_name}.csv')
     try:
@@ -48,7 +56,7 @@ def clean_file(
 
 
 def clean():
-    menu_item_df = clean_file(
+    dish_df = clean_file(
         file_name='Dish',
         drop_col_if_null=['id'],
         drop_not_required_col=[
@@ -60,14 +68,14 @@ def clean():
             'lowest_price',
             'highest_price',
         ],
-        convert_to_type={'id': 'int64'},
+        coerce_to_int64=['id'],
     )
 
     menu_item_df = clean_file(
         file_name='MenuItem',
         drop_col_if_null=['price', 'menu_page_id', 'dish_id'],
         drop_not_required_col=['updated_at', 'xpos', 'ypos', 'high_price', 'created_at'],
-        convert_to_type={'dish_id': 'int64'},
+        coerce_to_int64=['dish_id', 'menu_page_id'],
     )
 
     menu_df = clean_file(
@@ -106,8 +114,16 @@ def clean():
             'full_width',
             'uuid',
         ],
-        convert_to_type={'id': 'int64', 'menu_id': 'int64'},
+        coerce_to_int64=['id', 'menu_id'],
     )
+
+    join_dish_menu_item_df = pd.merge(
+        left=dish_df,
+        right=menu_item_df,
+        left_on='id',
+        right_on='dish_id')
+
+    print(join_dish_menu_item_df.info())
 
 
 if __name__ == '__main__':
