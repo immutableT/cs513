@@ -174,7 +174,7 @@ def clean():
 
 
 if __name__ == '__main__':
-    # cpi.update()
+    cpi.update()
     clean()
 
 
