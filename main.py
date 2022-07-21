@@ -4,6 +4,8 @@ import cpi
 import zipfile
 from typing import Optional
 from os.path import exists
+import datetime
+
 
 def clean_file(
         file_name: str,
@@ -163,18 +165,25 @@ def clean():
     dish_to_menu_item_df = merge_dishes_to_menu_items(
         dish_df,
         menu_item_df)
-    dish_to_menu_item_to_menu_page = merge_dishes_to_menu_items_to_menu_page(
+    dish_to_menu_item_to_menu_page_df = merge_dishes_to_menu_items_to_menu_page(
         dish_to_menu_item_df,
         menu_page_df)
-    dish_to_menu_item_to_menu_page_to_menu = merge_dishes_to_menu_items_to_menu_page_to_menu(
-        dish_to_menu_item_to_menu_page,
+    full_join_df = merge_dishes_to_menu_items_to_menu_page_to_menu(
+        dish_to_menu_item_to_menu_page_df,
         menu_df)
 
-    print(dish_to_menu_item_to_menu_page_to_menu.head())
+    # CPI package does not go back as far as the NYPL-Menu.
+    full_join_df = full_join_df[full_join_df['date'] >= datetime.datetime(1920, 1, 1)]
+
+    full_join_df['adjusted_to_inflation_price'] = full_join_df.apply(
+        lambda row: cpi.inflate(row.price, row.date),
+        axis=1)
+
+    print(full_join_df.head())
 
 
 if __name__ == '__main__':
-    cpi.update()
+    # cpi.update()
     clean()
 
 
