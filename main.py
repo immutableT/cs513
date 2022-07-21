@@ -179,6 +179,7 @@ def clean():
         lambda row: cpi.inflate(row.price, row.date),
         axis=1)
 
+    full_join_df.to_csv(os.path.join('data', 'FullJoin.csv'), index=False)
     print(full_join_df.head())
 
 
