@@ -3,7 +3,7 @@ import pandas as pd
 import cpi
 import zipfile
 from typing import Optional
-
+from os.path import exists
 
 def clean_file(
         file_name: str,
@@ -28,6 +28,8 @@ def clean_file(
         coerce_to_datetime = []
 
     path_to_zip = os.path.join('data', f'{file_name}.zip')
+    if not exists(path_to_zip):
+        raise RuntimeError(f'no such file {path_to_zip}')
     with zipfile.ZipFile(path_to_zip, 'r') as zipf:
         zipf.extractall(os.path.join('data'))
 
@@ -70,6 +72,29 @@ def merge_dishes_to_menu_items(dish_df, menu_item_df):
     join_df.rename(
         columns={'id_menu_item': 'menu_item_id'},
         inplace=True)
+    return join_df
+
+
+def merge_dishes_to_menu_items_to_menu_page(merge_dishes_to_menu_items_df, menu_page_df):
+    join_df = pd.merge(
+        left=merge_dishes_to_menu_items_df,
+        right=menu_page_df,
+        left_on='menu_page_id',
+        right_on='id',
+        how='inner',
+    )
+    join_df.drop(['id'], axis=1, inplace=True)
+    return join_df
+
+def merge_dishes_to_menu_items_to_menu_page_to_menu(dishes_to_menu_items_to_menu_page, menu_df):
+    join_df = pd.merge(
+        left=dishes_to_menu_items_to_menu_page,
+        right=menu_df,
+        left_on='menu_id',
+        right_on='id',
+        how='inner',
+    )
+    join_df.drop(['id'], axis=1, inplace=True)
     return join_df
 
 
@@ -135,9 +160,17 @@ def clean():
         coerce_to_int64=['id', 'menu_id'],
     )
 
-    join_dish_menu_item_df = merge_dishes_to_menu_items(dish_df, menu_item_df)
-    print(join_dish_menu_item_df.info())
-    print(join_dish_menu_item_df.head(100))
+    dish_to_menu_item_df = merge_dishes_to_menu_items(
+        dish_df,
+        menu_item_df)
+    dish_to_menu_item_to_menu_page = merge_dishes_to_menu_items_to_menu_page(
+        dish_to_menu_item_df,
+        menu_page_df)
+    dish_to_menu_item_to_menu_page_to_menu = merge_dishes_to_menu_items_to_menu_page_to_menu(
+        dish_to_menu_item_to_menu_page,
+        menu_df)
+
+    print(dish_to_menu_item_to_menu_page_to_menu.head())
 
 
 if __name__ == '__main__':
