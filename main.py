@@ -1,9 +1,8 @@
 import os
-import cpi
-import datetime
 
 from data_file_factory import create_data_frames
 from joiner import Joiner
+from inflation_adjuster import InflationAdjuster
 
 
 def pre_process():
@@ -17,15 +16,13 @@ def pre_process():
     joiner.join()
     full_join_df = joiner.full_join_df
 
-    # CPI package does not go back as far as the NYPL-Menu.
-    full_join_df = full_join_df[full_join_df['date'] >= datetime.datetime(1920, 1, 1)]
+    inflation_adjuster = InflationAdjuster(full_join_df=full_join_df)
+    inflation_adjuster.inflate()
 
-    full_join_df['adjusted_to_inflation_price'] = full_join_df.apply(
-        lambda row: cpi.inflate(row.price, row.date),
-        axis=1)
-
-    full_join_df.to_csv(os.path.join('data', 'FullJoin.csv'), index=False)
-    print(full_join_df.head())
+    inflation_adjuster.adjusted_df.to_csv(
+        os.path.join('data', 'FullJoin.csv'),
+        index=False)
+    print(inflation_adjuster.adjusted_df.head())
 
 
 if __name__ == '__main__':
