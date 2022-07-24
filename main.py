@@ -3,6 +3,7 @@ import os
 from data_file_factory import create_data_frames
 from joiner import Joiner
 from inflation_adjuster import InflationAdjuster
+from grouper import Grouper
 
 
 def pre_process():
@@ -19,7 +20,12 @@ def pre_process():
     inflation_adjuster = InflationAdjuster(full_join_df=full_join_df)
     inflation_adjuster.inflate()
 
-    inflation_adjuster.adjusted_df.to_csv(
+    # TODO: Remove rows where price is greater than 100.
+
+    grouper = Grouper(inflation_adjuster.adjusted_df)
+    grouper.group()
+
+    grouper.df.to_csv(
         os.path.join('data', 'FullJoin.csv'),
         index=False)
     print(inflation_adjuster.adjusted_df.head())
