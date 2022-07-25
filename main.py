@@ -6,6 +6,8 @@ from inflation_adjuster import InflationAdjuster
 from grouper import Grouper
 
 
+# @Begin
+
 def pre_process():
     dish_df, menu_item_df, menu_page_df, menu_df = create_data_frames()
 
