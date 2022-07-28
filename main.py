@@ -1,5 +1,6 @@
 import os
 
+from currency_filter import CurrencyFilter
 from data_file_factory import create_data_frames
 from joiner import Joiner
 from inflation_adjuster import InflationAdjuster
@@ -36,6 +37,11 @@ def pre_process():
     # @END _delete_rows_with_null_values
 
     dish_df, menu_item_df, menu_page_df, menu_df = create_data_frames()
+
+    currency_filter = CurrencyFilter(menu_df)
+    currency_filter.clean()
+    menu_df = currency_filter.df
+
 
     # @BEGIN join
     # @IN clean_dish_df @IN clean_menu_item_df @IN clean_menu_page_df @IN clean_menu_df
