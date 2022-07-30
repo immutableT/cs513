@@ -63,6 +63,9 @@ class DataFile:
     def _delete_rows_with_null_values(self):
         self._df.dropna(subset=self._col_cant_have_null_values, inplace=True)
 
+    def get_unique_value(self, column_name):
+        return self._df[column_name].unique()
+
     def clean(self):
         """
         Implements the process of pre-processing a dirty file.

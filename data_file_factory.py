@@ -51,7 +51,7 @@ def create_data_frames():
             'language',
             'location',
             'location_type',
-            'currency',
+            # 'currency',
             'currency_symbol',
             'status',
             'page_count',
