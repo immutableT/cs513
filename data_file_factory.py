@@ -84,4 +84,4 @@ def create_data_frames():
     menu_page.clean()
     menu.clean()
 
-    return dish.df, menu_item.df, menu_page.df, menu.df
+    return dish, menu_item, menu_page, menu

@@ -86,3 +86,8 @@ class DataFile:
         except FileNotFoundError:
             pass
         self._df.to_csv(save_path, index=False)
+
+    def assert_no_nan(self):
+        number_of_rows_with_nan = sum(self._df.isnull().values.ravel())
+        assert number_of_rows_with_nan == 0,\
+            f'Expected zero rows with NaN, but got {number_of_rows_with_nan} in {self._name}'

@@ -45,7 +45,7 @@ currencies_to_ignore = [
 
 
 class CurrencyFilter:
-    def __init__(self, df:pd.DataFrame):
+    def __init__(self, df: pd.DataFrame):
         self._df = df
 
     @property
@@ -57,4 +57,3 @@ class CurrencyFilter:
         self._df = self._df[~self._df['currency'].isin(currencies_to_ignore)]
         self._df.drop(['currency'], axis=1, inplace=True)
         print(f'Number of menus after filtering by currency {len(self._df)}')
-

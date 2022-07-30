@@ -36,20 +36,23 @@ def pre_process():
     # @OUT clean_dish_df @OUT clean_menu_item_df @OUT clean_menu_page_df @OUT clean_menu_df
     # @END _delete_rows_with_null_values
 
-    dish_df, menu_item_df, menu_page_df, menu_df = create_data_frames()
-
-    currency_filter = CurrencyFilter(menu_df)
+    dish, menu_item, menu_page, menu = create_data_frames()
+    currency_filter = CurrencyFilter(menu.df)
     currency_filter.clean()
     menu_df = currency_filter.df
 
+    assert sum(dish.df.isnull().values.ravel()) == 0
+    assert sum(menu_item.df.isnull().values.ravel()) == 0
+    assert sum(menu_page.df.isnull().values.ravel()) == 0
+    assert sum(menu_df.isnull().values.ravel()) == 0
 
     # @BEGIN join
     # @IN clean_dish_df @IN clean_menu_item_df @IN clean_menu_page_df @IN clean_menu_df
     # @OUT full_join_df
     joiner = Joiner(
-        dish_df=dish_df,
-        menu_item_df=menu_item_df,
-        menu_page_df=menu_page_df,
+        dish_df=dish.df,
+        menu_item_df=menu_item.df,
+        menu_page_df=menu_page.df,
         menu_df=menu_df)
     joiner.join()
     full_join_df = joiner.full_join_df
@@ -62,7 +65,7 @@ def pre_process():
     inflation_adjuster.inflate()
     # @END inflation_adjuster
 
-    #TODO: Remove rows where price is greater than 100.
+    # TODO: Remove rows where price is greater than 100.
 
     # @BEGIN grouping
     # @IN inflation_adjuster.adjusted_df @AS inflation_adjusted_df
@@ -78,9 +81,7 @@ def pre_process():
 
 # @END pre_process
 
+
 if __name__ == '__main__':
-    #cpi.update()
+    # cpi.update()
     pre_process()
-
-
-
