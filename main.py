@@ -28,7 +28,7 @@ def pre_process():
     grouper.df.to_csv(
         os.path.join('data', 'FullJoin.csv'),
         index=False)
-    print(inflation_adjuster.adjusted_df.head())
+    print(grouper.df.head())
 
 
 if __name__ == '__main__':
