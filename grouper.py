@@ -12,8 +12,6 @@ class Grouper:
         return self._group_level_one
 
     def _group_by_dish_id_and_year(self):
-        # self._group_level_one = self._df.groupby(
-        #     ['dish_id', 'year'], as_index=False)[['adjusted_to_inflation_price']].mean()
         self._group_level_one = self._df.groupby(
             ['dish_id', 'year'], as_index=False).agg(
                 Mean=('adjusted_to_inflation_price', np.mean),
